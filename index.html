@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boekingsoverzicht</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎧</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-icon">🎧</span>
+        <div>
+          <h1>Boekingsoverzicht</h1>
+          <p class="subtitle">Gages, kosten en commissie per boeking &mdash; in één oogopslag</p>
+        </div>
+      </div>
+      <button id="btnAdd" class="btn btn-primary">+ Nieuwe boeking</button>
+    </header>
+
+    <section class="stats" id="stats">
+      <div class="stat-card stat-open">
+        <span class="stat-label">Open boekingen</span>
+        <span class="stat-value" id="statOpenCount">0</span>
+        <span class="stat-sub" id="statOpenAmount">&euro;0 nog te ontvangen</span>
+      </div>
+      <div class="stat-card stat-pending">
+        <span class="stat-label">Nog uit te betalen aan artiest</span>
+        <span class="stat-value" id="statPendingAmount">&euro;0</span>
+        <span class="stat-sub" id="statPendingCount">0 boekingen</span>
+      </div>
+      <div class="stat-card stat-commissie">
+        <span class="stat-label">Commissie deze maand</span>
+        <span class="stat-value" id="statCommissieMaand">&euro;0</span>
+        <span class="stat-sub" id="statCommissieMaandLabel"></span>
+      </div>
+    </section>
+
+    <section class="toolbar">
+      <div class="filters">
+        <select id="filterStatus">
+          <option value="alle">Alle statussen</option>
+          <option value="open">Open</option>
+          <option value="betaald door promotor">Betaald door promotor</option>
+          <option value="uitbetaald aan artiest">Uitbetaald aan artiest</option>
+        </select>
+        <select id="filterArtiest">
+          <option value="alle">Alle artiesten</option>
+        </select>
+        <input id="filterZoek" type="text" placeholder="Zoek op promotor of notitie…">
+      </div>
+      <button id="btnExport" class="btn btn-secondary">Exporteer CSV</button>
+    </section>
+
+    <section class="table-wrap">
+      <table id="table">
+        <thead>
+          <tr>
+            <th>Datum</th>
+            <th>Artiest</th>
+            <th>Promotor</th>
+            <th class="num">Gage</th>
+            <th class="num">Kosten</th>
+            <th class="num">Commissie</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div id="emptyState" class="empty-state" hidden>
+        <p>Nog geen boekingen. Klik op <strong>+ Nieuwe boeking</strong> om te beginnen.</p>
+      </div>
+    </section>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay" hidden>
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modalTitle">Nieuwe boeking</h2>
+        <button id="btnCloseModal" class="btn-icon" aria-label="Sluiten">&times;</button>
+      </div>
+      <form id="bookingForm">
+        <input type="hidden" id="bookingId">
+
+        <div class="ai-box">
+          <div class="ai-box-header">
+            <span class="ai-badge">🤖 AI</span>
+            <span>Plak een WhatsApp- of mailbericht, dan vult AI het formulier voor je in</span>
+          </div>
+          <textarea id="aiTekst" rows="3" placeholder="bv. &quot;Hoi, kunnen we Hades boeken voor 24 okt? Gage 900 euro, zaal Loft&quot;"></textarea>
+          <div class="ai-box-actions">
+            <button type="button" id="btnAiParse" class="btn btn-ai">Vul automatisch in</button>
+            <span id="aiParseStatus" class="ai-status"></span>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="fArtiest">Artiest *</label>
+          <input id="fArtiest" required list="artiestSuggesties" autocomplete="off">
+          <datalist id="artiestSuggesties"></datalist>
+        </div>
+        <div class="form-row">
+          <label for="fPromotor">Promotor</label>
+          <input id="fPromotor" autocomplete="off">
+        </div>
+        <div class="form-row">
+          <label for="fDatum">Datum van de show *</label>
+          <input id="fDatum" type="date" required>
+        </div>
+        <div class="form-row two-col">
+          <div>
+            <label for="fGage">Gage (&euro;) *</label>
+            <input id="fGage" type="number" min="0" step="0.01" required>
+          </div>
+          <div>
+            <label for="fKosten">Kosten (&euro;)</label>
+            <input id="fKosten" type="number" min="0" step="0.01" value="0">
+          </div>
+        </div>
+        <div class="form-row two-col">
+          <div>
+            <label for="fCommissie">Commissie (&euro;)</label>
+            <input id="fCommissie" type="number" min="0" step="0.01">
+          </div>
+          <div>
+            <label for="fCommissiePct">Commissie % (auto-invullen)</label>
+            <input id="fCommissiePct" type="number" min="0" step="1" placeholder="bv. 15">
+          </div>
+        </div>
+        <div class="form-row">
+          <label for="fStatus">Status</label>
+          <select id="fStatus">
+            <option value="open">Open</option>
+            <option value="betaald door promotor">Betaald door promotor</option>
+            <option value="uitbetaald aan artiest">Uitbetaald aan artiest</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="fNotitie">Notitie</label>
+          <textarea id="fNotitie" rows="2"></textarea>
+        </div>
+
+        <div class="ai-box" id="aiReminderBox" hidden>
+          <div class="ai-box-header">
+            <span class="ai-badge">🤖 AI</span>
+            <span>Laat AI een herinneringsbericht aan de promotor opstellen</span>
+          </div>
+          <div class="ai-box-actions">
+            <button type="button" id="btnAiReminder" class="btn btn-ai">Genereer herinneringsbericht</button>
+            <span id="aiReminderStatus" class="ai-status"></span>
+          </div>
+          <div id="aiReminderResultWrap" class="ai-result-wrap" hidden>
+            <textarea id="aiReminderResult" rows="4" readonly></textarea>
+            <button type="button" id="btnCopyReminder" class="btn btn-secondary btn-small">Kopieer bericht</button>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" id="btnDelete" class="btn btn-danger" hidden>Verwijderen</button>
+          <div class="modal-actions-right">
+            <button type="button" id="btnCancel" class="btn btn-secondary">Annuleren</button>
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
