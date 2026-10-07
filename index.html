@@ -20,6 +20,11 @@
       <button id="btnAdd" class="btn btn-primary">+ Nieuwe boeking</button>
     </header>
 
+    <div class="ai-notice" role="note">
+      <span class="ai-badge">🤖 AI</span>
+      <span>Deze website gebruikt AI (Claude van Anthropic) om berichten uit te lezen en herinneringen op te stellen. Wat de AI invult of schrijft kan fouten bevatten: controleer het altijd voordat je opslaat of verstuurt.</span>
+    </div>
+
     <section class="stats" id="stats">
       <div class="stat-card stat-open">
         <span class="stat-label">Open boekingen</span>
@@ -91,6 +96,7 @@
             <span>Plak een WhatsApp- of mailbericht, dan vult AI het formulier voor je in</span>
           </div>
           <textarea id="aiTekst" rows="3" placeholder="bv. &quot;Hoi, kunnen we Hades boeken voor 24 okt? Gage 900 euro, zaal Loft&quot;"></textarea>
+          <p class="privacy-hint">🔒 Deze tekst gaat naar een externe AI-dienst buiten Nederland. Telefoonnummers en e-mailadressen worden automatisch weggehaald vóór verzending. Plak geen bankgegevens, adressen of andere persoonsgegevens.</p>
           <div class="ai-box-actions">
             <button type="button" id="btnAiParse" class="btn btn-ai">Vul automatisch in</button>
             <span id="aiParseStatus" class="ai-status"></span>
@@ -153,6 +159,7 @@
             <span id="aiReminderStatus" class="ai-status"></span>
           </div>
           <div id="aiReminderResultWrap" class="ai-result-wrap" hidden>
+            <p class="ai-label">Gemaakt met AI. Lees het na en pas het aan voordat je het verstuurt.</p>
             <textarea id="aiReminderResult" rows="4" readonly></textarea>
             <button type="button" id="btnCopyReminder" class="btn btn-secondary btn-small">Kopieer bericht</button>
           </div>

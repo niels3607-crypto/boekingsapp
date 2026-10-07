@@ -341,8 +341,38 @@ function setAiParseStatus(msg, isError = false) {
   status.classList.toggle("is-error", isError);
 }
 
+/* Privacy: telefoonnummers en e-mailadressen eruit halen vóórdat de tekst naar de
+   AI-dienst gaat. Die zijn niet nodig om het formulier in te vullen (dataminimalisatie). */
+function verwijderPersoonsgegevens(tekst) {
+  let aantal = 0;
+  // Datums eerst apart zetten, zodat een datum vlak voor een telefoonnummer
+  // niet samen met dat nummer wordt weggehaald.
+  const datums = [];
+  const zonderDatums = tekst.replace(
+    /\b\d{1,2}[-/.]\d{1,2}[-/.]\d{2,4}\b|\b\d{4}-\d{2}-\d{2}\b/g,
+    (datum) => {
+      datums.push(datum);
+      return `§D${datums.length - 1}§`;
+    }
+  );
+  const schoon = zonderDatums
+    .replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, () => {
+      aantal++;
+      return "[e-mail verwijderd]";
+    })
+    .replace(/(?:\+|00)?\d[\d\s().-]{7,}\d/g, (match) => {
+      // Alleen echte telefoonnummers (9+ cijfers), geen bedragen of datums
+      if (match.replace(/\D/g, "").length < 9) return match;
+      aantal++;
+      return "[telefoonnummer verwijderd]";
+    })
+    .replace(/§D(\d+)§/g, (_, i) => datums[Number(i)]); // datums terugzetten
+  return { schoon, aantal };
+}
+
 async function handleAiParse() {
-  const tekst = el("aiTekst").value.trim();
+  const ruweTekst = el("aiTekst").value.trim();
+  const { schoon: tekst, aantal: aantalVerwijderd } = verwijderPersoonsgegevens(ruweTekst);
   if (!tekst) {
     setAiParseStatus("Plak eerst een bericht.", true);
     return;
@@ -363,7 +393,10 @@ async function handleAiParse() {
     }
     if (data.notitie) el("fNotitie").value = data.notitie;
 
-    setAiParseStatus("Ingevuld — controleer de velden voordat je opslaat.");
+    const privacyMelding = aantalVerwijderd
+      ? ` (${aantalVerwijderd} telefoonnummer/e-mailadres vóór verzending weggehaald)`
+      : "";
+    setAiParseStatus("Ingevuld door AI — controleer de velden voordat je opslaat." + privacyMelding);
   } catch (e) {
     setAiParseStatus("Kon niet automatisch invullen: " + e.message, true);
   } finally {

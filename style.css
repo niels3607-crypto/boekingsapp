@@ -196,7 +196,7 @@ td.num, th.num { text-align: right; }
 }
 .ai-badge {
   background: #6c4cf1; color: #fff; font-size: 11px; font-weight: 700;
-  padding: 2px 8px; border-radius: 999px; letter-spacing: 0.02em;
+  padding: 2px 8px; border-radius: 999px; letter-spacing: 0.02em; white-space: nowrap;
 }
 .ai-box textarea {
   width: 100%; border: 1px solid #ddd4fa; border-radius: 8px;
@@ -218,6 +218,20 @@ td.num, th.num { text-align: right; }
 .ai-result-wrap textarea {
   width: 100%; border: 1px solid #ddd4fa; border-radius: 8px;
   padding: 9px 10px; font-size: 13.5px; font-family: inherit; background: #fff; color: var(--text);
+}
+
+.ai-notice {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: #f4f1ff; border: 1px solid #e0d9fb; border-radius: var(--radius);
+  padding: 10px 14px; margin-bottom: 22px;
+  font-size: 13px; color: #4a3d99; line-height: 1.45;
+}
+.ai-notice .ai-badge { flex-shrink: 0; margin-top: 1px; }
+.privacy-hint {
+  margin: 6px 0 0; font-size: 12px; color: var(--text-muted); line-height: 1.4;
+}
+.ai-label {
+  margin: 0; font-size: 12px; font-weight: 600; color: #5b4bb8;
 }
 
 @media (max-width: 680px) {
